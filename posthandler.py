@@ -25,7 +25,8 @@ class PostHandler:
     
     def post_tweets(self) -> None:
         for post in self.post_queue:
-            post_string: str = f'{get_post_time(post):<12} {post.name:>15}: {post.text}'
+            post_name: str = get_name(post)
+            post_string: str = f'{get_post_time(post):<12} - {post_name:>15}: {post.text}'
             print(post_string)
             print('\n')
         
@@ -35,3 +36,7 @@ def get_post_time(tweet: Tweet, output_format: str = '%d%b%y %H:%M', output_time
     #output_format: str = '%H:%M %Z %d%b%y'
     creation_time: datetime = datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y').astimezone(output_timezone)
     return creation_time.strftime(output_format)
+
+def get_name(Tweet) -> str:
+    return Tweet._data['core']['user_results']['result']['legacy']['name']
+
