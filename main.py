@@ -9,15 +9,21 @@ from twikit import Client, Tweet
 
 from posthandler import PostHandler
 
-load_dotenv('.env')
+if getenv('DEV_VAR') == 'rudizabudi':
+    load_dotenv('.env.dev')
+else:
+    load_dotenv('.env')
 
 USERNAME: str = getenv('USERNAME')
 EMAIL: str = getenv('EMAIL')
 PASSWORD: str = getenv('PASSWORD')
 TWITTER_IDS: dict[str, str] = getenv('twitter_ids').split(',')
 
+MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD'))
+DISCORD_WEBHOOK: str = getenv('WEBHOOK')
+
 client: Client = Client('en-US')
-post_handler: PostHandler = PostHandler()
+post_handler: PostHandler = PostHandler(mirror_discord=MIRROR_DISCORD, discord_webhook=DISCORD_WEBHOOK)
 
 async def main():
     await client.login(
