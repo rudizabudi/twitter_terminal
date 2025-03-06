@@ -1,4 +1,3 @@
-
 import asyncio
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -44,8 +43,7 @@ async def main():
         
         i = 0
         post_handler.process_tweets()
-        sleep(60)
-        
+        sleep(60)        
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=20)

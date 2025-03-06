@@ -1,4 +1,5 @@
 from datetime import datetime
+import html
 import pytz
 import requests
 from time import sleep
@@ -30,16 +31,17 @@ class PostHandler:
         self.sort_tweets()
         for post in self.post_queue:
             post_name: str = get_name(post)
-            
-            terminal_post_string: str = f'{get_post_time(post):<12} - \033[1m{post_name:>15}\33[0m: {post.text}'
+            post_text: str = html.unescape(post.text)
+
+            terminal_post_string: str = f'{get_post_time(post):<12} - \033[1m{post_name:>15}\33[0m: {post_text}'
 
             self.terminal_post_tweet(post_string = terminal_post_string)
 
             if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
-                #discord_post_string: str = f'{get_post_time(post):<12} - **{post_name:>15}** : {post.text}'
-                discord_post_string: str = f'{get_post_time(post):<12} : {post.text}'
-
-                self.discord_post_tweet(post_string = discord_post_string, twitterer= post_name)
+                #discord_post_string: str = f'{get_post_time(post):<12} - **{post_name:>15}** : {post_text}'
+                discord_post_string: str = f'{get_post_time(post):<12} : {post_text}'
+                discord_avatar: str = get_profile_image(post)
+                self.discord_post_tweet(post_string = discord_post_string, twitterer = post_name, avatar = discord_avatar)
             
             self.posted_tweets.append(post)
         
@@ -53,8 +55,11 @@ class PostHandler:
             print(post_string)
             print('\n')
 
-    def discord_post_tweet(self, post_string, twitterer='Alfred der Botler') -> None:
-        data: dict[str, str] = {'content': post_string, 'username': twitterer} 
+    def discord_post_tweet(self, post_string, twitterer='Alfred der Botler', avatar = '') -> None:
+        data: dict[str: str] = {'content': post_string,
+                                 'username': twitterer,
+                                 'avatar_url': avatar} 
+        
         response: requests.models.response = requests.post(self.discord_webhook, json=data)
 
         if response.status_code == 429:
@@ -68,6 +73,8 @@ def get_post_time(tweet: Tweet, output_format: str = '%d%b%y %H:%M', output_time
     creation_time: datetime = datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y').astimezone(output_timezone)
     return creation_time.strftime(output_format)
 
-def get_name(Tweet) -> str:
-    return Tweet._data['core']['user_results']['result']['legacy']['name']
+def get_name(tweet: Tweet) -> str:
+    return tweet._data['core']['user_results']['result']['legacy']['name']
 
+def get_profile_image(tweet: Tweet) -> str:
+    return tweet._data['core']['user_results']['result']['legacy']['profile_image_url_https']
