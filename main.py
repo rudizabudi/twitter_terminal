@@ -1,3 +1,4 @@
+from ast import literal_eval
 import asyncio
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -19,10 +20,10 @@ PASSWORD: str = getenv('PASSWORD')
 TWITTER_IDS: dict[str, str] = getenv('twitter_ids').split(',')
 
 MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD'))
-DISCORD_WEBHOOK: str = getenv('WEBHOOK')
+webhooks: dict[str: list[str]] = literal_eval(getenv('WEBHOOKS'))
 
 client: Client = Client('en-US')
-post_handler: PostHandler = PostHandler(mirror_discord=MIRROR_DISCORD, discord_webhook=DISCORD_WEBHOOK)
+post_handler: PostHandler = PostHandler(mirror_discord=MIRROR_DISCORD, webhooks=webhooks)
 
 async def main():
     await client.login(

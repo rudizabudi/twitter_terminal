@@ -6,12 +6,18 @@ from time import sleep
 from twikit import Tweet
 
 class PostHandler:
-    def __init__(self, mirror_discord = False, discord_webhook = None) -> None:
+    def __init__(self, mirror_discord = False, webhooks = None) -> None:
         
         self.mirror_discord: bool = mirror_discord
-        if self.mirror_discord and discord_webhook is None:
+        if self.mirror_discord and webhooks is None:
             raise ValueError('Discord webhook URL required for mirroring')
-        self.discord_webhook: str = discord_webhook
+        
+        self.default_webhook: dict[str: dict[str]] = [(k, v) for k, v in webhooks.items() if v['filter'] == '*']
+        if len(self.default_webhook) != 1:
+            raise ValueError('Exactly one default/catch-all webhook required')
+        
+        self.default_webhook: str = self.default_webhook[0][1]
+        self.rest_webhooks = {k: v for k, v in webhooks.items() if v['filter']!= '*'}
 
         self.new_tweets: list[None | Tweet] = []
         self.post_queue: list[None | Tweet] = []
@@ -60,7 +66,14 @@ class PostHandler:
                                  'username': twitterer,
                                  'avatar_url': avatar} 
         
-        response: requests.models.response = requests.post(self.discord_webhook, json=data)
+        for _, v in self.rest_webhooks.items():
+            if v['filter'] in post_string:
+                webhook = v['url']
+                break
+        else:
+            webhook = self.default_webhook['url']
+
+        response: requests.models.response = requests.post(webhook, json=data)
 
         if response.status_code == 429:
             sleep(30)
