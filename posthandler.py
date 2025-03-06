@@ -8,7 +8,7 @@ class PostHandler:
         self.post_queue: list[None | Tweet] = []
         self.posted_tweets: list[None | Tweet] = []
 
-    def add_tweet(self, tweet: Tweet):
+    def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)
     
     def process_tweets(self) -> None:
@@ -26,7 +26,8 @@ class PostHandler:
     def post_tweets(self) -> None:
         for post in self.post_queue:
             post_name: str = get_name(post)
-            post_string: str = f'{get_post_time(post):<12} - {post_name:>15}: {post.text}'
+            
+            post_string: str = f'{get_post_time(post):<12} - \033[1m{post_name:>15}\33[0m: {post.text}'
             print(post_string)
             print('\n')
         
