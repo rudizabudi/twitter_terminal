@@ -10,6 +10,7 @@ from twikit import Client, Tweet
 from posthandler import PostHandler
 
 if getenv('DEV_VAR') == 'rudizabudi':
+    print('DEV MODE')
     load_dotenv('.env.dev')
 else:
     load_dotenv('.env')

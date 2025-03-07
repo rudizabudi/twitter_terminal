@@ -58,8 +58,8 @@ class PostHandler:
         self.post_queue = sorted(self.post_queue, key=lambda tweet: datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y'))
     
     def terminal_post_tweet(self, post_string) -> None:
-            print(post_string)
-            print('\n')
+        print(post_string)
+        print('\n')
 
     def discord_post_tweet(self, post_string, twitterer='Alfred der Botler', avatar = '') -> None:
         data: dict[str: str] = {'content': post_string,
@@ -73,13 +73,18 @@ class PostHandler:
         else:
             webhook = self.default_webhook['url']
 
-        response: requests.models.response = requests.post(webhook, json=data)
+        webhook = webhook.replace(' ', '').split(',')
+        
+        i: int = 0
+        while i != len(webhook):
+            response: requests.models.response = requests.post(webhook[i], json=data)
 
-        if response.status_code == 429:
-            sleep(30)
-            self.discord_post_tweet(post_string)
-        elif response.status_code not in (200, 204):
-            raise Warning(f'Discord webhook returned status code {response.status_code}')
+            if response.status_code == 429:
+                sleep(30)
+            elif response.status_code not in (200, 204):
+                raise Warning(f'Discord webhook returned status code {response.status_code}')
+            else:
+                i += 1
         
 def get_post_time(tweet: Tweet, output_format: str = '%d%b%y %H:%M', output_timezone: pytz.timezone = pytz.timezone('Europe/Berlin')) -> str:
     #output_format: str = '%H:%M %Z %d%b%y'
