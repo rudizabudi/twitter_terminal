@@ -50,7 +50,6 @@ async def main():
         except ConnectTimeout:
             sleep(60)
 
-
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=20)
     for tweet in tweets:
