@@ -2,7 +2,7 @@ from ast import literal_eval
 import asyncio
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from httpx import ConnectError
+from httpx import ConnectError, ConnectTimeout
 from os import getenv
 from time import sleep
 from twikit import Client, Tweet
@@ -35,17 +35,21 @@ async def main():
 
     i: int = 0
     while True:
-        while i < len(TWITTER_IDS):
-            try:
-                await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
-                sleep(5)
-                i += 1
-            except ConnectError:
-                pass        
-        
-        i = 0
-        post_handler.process_tweets()
-        sleep(60)        
+        try:
+            while i < len(TWITTER_IDS):
+                try:
+                    await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
+                    sleep(5)
+                    i += 1
+                except ConnectError:
+                    pass        
+            
+            i = 0
+            post_handler.process_tweets()
+            sleep(60)
+        except ConnectTimeout:
+            sleep(60)
+
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=20)

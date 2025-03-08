@@ -8,7 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+dev_bin/
 
 # Custom files
 tester.py
 .env.dev
+termux_instructions_raspi.txt
+cookies.json
