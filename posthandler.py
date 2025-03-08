@@ -96,3 +96,4 @@ def get_name(tweet: Tweet) -> str:
 
 def get_profile_image(tweet: Tweet) -> str:
     return tweet._data['core']['user_results']['result']['legacy']['profile_image_url_https']
+
