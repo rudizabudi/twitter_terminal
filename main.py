@@ -34,6 +34,7 @@ async def main():
             password=PASSWORD,
             cookies_file='cookies.json')
 
+<<<<<<< HEAD
         while True:
                 while i < len(TWITTER_IDS):
                     try:
@@ -50,6 +51,24 @@ async def main():
     except ConnectTimeout as e:
         print('Connection timeout, retrying in 1 minute')
         sleep(60)       
+=======
+    i: int = 0
+    while True:
+        try:
+            while i < len(TWITTER_IDS):
+                try:
+                    await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
+                    sleep(5)
+                    i += 1
+                except ConnectError:
+                    pass        
+            
+            i = 0
+            post_handler.process_tweets()
+            sleep(60)
+        except ConnectTimeout:
+            sleep(60)
+>>>>>>> b6c49a24040f5bc16cf97d2510ce257eaa43108c
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=20)

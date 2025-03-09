@@ -5,8 +5,12 @@ description = "Supports both terminal and discord output"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "beautifulsoup4>=4.13.3",
     "dotenv>=0.9.9",
     "pytz>=2025.1",
     "requests>=2.32.3",
     "twikit>=2.3.3",
 ]
+
+[tool.uv.workspace]
+members = ["dummy_version"]
