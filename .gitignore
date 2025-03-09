@@ -12,3 +12,5 @@ wheels/
 # Custom files
 tester.py
 .env.dev
+dev_bin/cookies2.json
+termux_instructions_raspi.txt
