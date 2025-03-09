@@ -2,7 +2,7 @@ from ast import literal_eval
 import asyncio
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from httpx import ConnectError
+from httpx import ConnectError, ConnectTimeout
 from os import getenv
 from time import sleep
 from twikit import Client, Tweet
@@ -49,8 +49,8 @@ async def main():
             post_handler.process_tweets()
             sleep(60)
 
-    except (TooManyRequests):
-        print('Too many requests. Sleeping for 60 seconds.')
+    except (TooManyRequests, ConnectTimeout) as e:
+        print(f'Too many requests. Sleeping for 60 seconds. {e}')
         sleep(60)
         await main()        
 
