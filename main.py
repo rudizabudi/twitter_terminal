@@ -6,7 +6,7 @@ from httpx import ConnectError, ConnectTimeout
 from os import getenv
 from time import sleep
 from twikit import Client, Tweet
-from twikit.errors import TooManyRequests
+from twikit.errors import TooManyRequests, AccountSuspended
 
 from posthandler import PostHandler
 
@@ -49,13 +49,13 @@ async def main():
             post_handler.process_tweets()
             sleep(60)
 
-    except (TooManyRequests, ConnectTimeout) as e:
+    except (TooManyRequests, ConnectTimeout, AccountSuspended) as e:
         print(f'Too many requests. Sleeping for 60 seconds. {e}')
         sleep(60)
         await main()        
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
-    tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=20)
+    tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
     for tweet in tweets:
         ph.add_tweet(tweet)
 
