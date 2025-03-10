@@ -47,11 +47,11 @@ async def main():
             
             i = 0
             post_handler.process_tweets()
-            sleep(60)
+            sleep(600)
 
     except (TooManyRequests, ConnectTimeout, AccountSuspended) as e:
         print(f'Too many requests. Sleeping for 60 seconds. {e}')
-        sleep(60)
+        sleep(600)
         await main()        
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
