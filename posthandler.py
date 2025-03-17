@@ -12,11 +12,11 @@ class PostHandler:
         if self.mirror_discord and webhooks is None:
             raise ValueError('Discord webhook URL required for mirroring')
         
-        self.default_webhook: dict[str: dict[str]] = [(k, v) for k, v in webhooks.items() if v['filter'] == '*']
+        self.default_webhooks: dict[str: dict[str]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
         if len(self.default_webhook) != 1:
-            raise ValueError('Exactly one default/catch-all webhook required')
+            raise ImportError('Exactly one default/catch-all webhook required')
         
-        self.default_webhook: str = self.default_webhook[0][1]
+        self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
         self.rest_webhooks = {k: v for k, v in webhooks.items() if v['filter']!= '*'}
 
         self.new_tweets: list[None | Tweet] = []
@@ -28,7 +28,7 @@ class PostHandler:
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)
     
-    def process_tweets(self) -> None:
+    def process_msgs(self) -> None:
         while self.new_tweets:
             if self.new_tweets[-1] not in self.posted_tweets:
                 self.post_queue.append(self.new_tweets[-1])
@@ -68,16 +68,14 @@ class PostHandler:
         
         for _, v in self.rest_webhooks.items():
             if v['filter'] in post_string:
-                webhook = v['url']
+                webhooks = v['urls']
                 break
         else:
-            webhook = self.default_webhook['url']
-
-        webhook = webhook.replace(' ', '').split(',')
+            webhooks = self.default_webhooks
         
         i: int = 0
-        while i != len(webhook):
-            response: requests.models.response = requests.post(webhook[i], json=data)
+        while i != len(webhooks):
+            response: requests.models.response = requests.post(webhooks[i], json=data)
 
             if response.status_code == 429:
                 sleep(30)

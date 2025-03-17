@@ -46,7 +46,7 @@ async def main():
                     pass        
             
             i = 0
-            post_handler.process_tweets()
+            post_handler.process_msgs()
             sleep(600)
 
     except (TooManyRequests, ConnectTimeout, ReadTimeout, AccountSuspended) as e:
