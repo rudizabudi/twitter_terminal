@@ -13,7 +13,7 @@ class PostHandler:
             raise ValueError('Discord webhook URL required for mirroring')
         
         self.default_webhooks: dict[str: dict[str]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
-        if len(self.default_webhook) != 1:
+        if len(self.default_webhooks) != 1:
             raise ImportError('Exactly one default/catch-all webhook required')
         
         self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
