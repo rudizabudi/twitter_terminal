@@ -6,24 +6,25 @@ from time import sleep
 from twikit import Tweet
 
 class PostHandler:
-    def __init__(self, mirror_discord = False, webhooks = None) -> None:
-        
-        self.mirror_discord: bool = mirror_discord
-        if self.mirror_discord and webhooks is None:
-            raise ValueError('Discord webhook URL required for mirroring')
-        
-        self.default_webhooks: dict[str: dict[str]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
-        if len(self.default_webhooks) != 1:
-            raise ImportError('Exactly one default/catch-all webhook required')
-        
-        self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
-        self.rest_webhooks = {k: v for k, v in webhooks.items() if v['filter']!= '*'}
-
+    def __init__(self) -> None:
         self.new_tweets: list[None | Tweet] = []
         self.post_queue: list[None | Tweet] = []
         self.posted_tweets: list[None | Tweet] = []
 
         self.first_run: bool = True
+
+    def set_discord_settings(self, mirroring: bool = False, webhooks: dict[str: list[str]] = None):
+        self.mirror_discord: bool = mirroring
+        if self.mirror_discord and webhooks is None:
+            raise ValueError('Discord webhook URL required for mirroring')
+    
+        self.default_webhooks: dict[str: dict[str]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
+        if len(self.default_webhooks) != 1:
+            raise ImportError('Exactly one default/catch-all webhook required')
+        
+        self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
+        self.rest_webhooks: dict[str: dict[str: str]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}
+   
 
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)

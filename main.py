@@ -22,21 +22,34 @@ UPDATE_OFFSET: int = 20 #offset to update point in secs
 USERNAME: str = getenv('USERNAME') #twitter
 EMAIL: str = getenv('EMAIL') #twitter
 PASSWORD: str = getenv('PASSWORD') #twitter
-TWITTER_IDS: dict[str, str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
-
-MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD')) #discord mirror switch
-webhooks: dict[str: list[str]] = literal_eval(getenv('WEBHOOKS'))
+TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
 
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler(mirror_discord=MIRROR_DISCORD, webhooks=webhooks)
 
+env_update_hour: int = -1 #update twitter settings on each hour change
+
 async def main():
     try:
         await client.login(
-            auth_info_1=USERNAME,
-            auth_info_2=EMAIL,
-            password=PASSWORD,
-            cookies_file='cookies.json')
+            auth_info_1 = USERNAME,
+            auth_info_2 = EMAIL,
+            password = PASSWORD,
+            cookies_file = 'cookies.json')
+
+        def request_discord_settings():
+            TWITTER_IDS: dict[str, str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
+
+            MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD')) #discord mirror switch
+            webhooks: dict[str: list[str]] = literal_eval(getenv('WEBHOOKS'))
+
+            return TWITTER_IDS, MIRROR_DISCORD, webhooks
+
+        if datetime.now().hour != env_update_hour or not any(TWITTER_IDS, MIRROR_DISCORD, webhooks):
+            TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
+            env_update_hour = datetime.now().hour
+
+            post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
 
         i: int = 0
         while True:
@@ -64,7 +77,8 @@ async def main():
     except (TooManyRequests, ConnectTimeout, ReadTimeout, AccountSuspended) as e:
         print(f'Error occured. Sleeping for 600 seconds. {e}')
         sleep(600)
-        await main()        
+        await main()
+        
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
@@ -73,7 +87,4 @@ async def ask_tweets(twitter_id: str, ph: PostHandler):
 
 
 asyncio.run(main())
-
-
-
 
