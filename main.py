@@ -37,11 +37,11 @@ async def main():
             password = PASSWORD,
             cookies_file = 'cookies.json')
 
-        def request_discord_settings():
-            TWITTER_IDS: dict[str, str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
+        def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
+            TWITTER_IDS: list[str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
 
             MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD')) #discord mirror switch
-            webhooks: dict[str: list[str]] = literal_eval(getenv('WEBHOOKS'))
+            webhooks: dict[str: dict[str: str]] = literal_eval(getenv('WEBHOOKS'))
 
             return TWITTER_IDS, MIRROR_DISCORD, webhooks
 
