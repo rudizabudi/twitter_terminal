@@ -15,3 +15,5 @@ tester.py
 .env.dev
 termux_instructions_raspi.txt
 .env_test
+.env
+envs

@@ -4,9 +4,10 @@ from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from httpx import ConnectError, ConnectTimeout, ReadTimeout
 from os import getenv
+import os
 from time import sleep
 from twikit import Client, Tweet
-from twikit.errors import TooManyRequests, AccountSuspended
+from twikit.errors import TooManyRequests, AccountSuspended, Unauthorized
 
 from posthandler import PostHandler
 
@@ -24,6 +25,8 @@ EMAIL: str = getenv('EMAIL') #twitter
 PASSWORD: str = getenv('PASSWORD') #twitter
 TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
 
+COOKIES_FILE: str = 'cookies.json'
+
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler(mirror_discord=MIRROR_DISCORD, webhooks=webhooks)
 
@@ -35,7 +38,7 @@ async def main():
             auth_info_1 = USERNAME,
             auth_info_2 = EMAIL,
             password = PASSWORD,
-            cookies_file = 'cookies.json')
+            cookies_file = COOKIES_FILE)
 
         def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
             TWITTER_IDS: list[str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
@@ -50,6 +53,7 @@ async def main():
             env_update_hour = datetime.now().hour
 
             post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
+
 
         i: int = 0
         while True:
@@ -78,6 +82,12 @@ async def main():
         print(f'Error occured. Sleeping for 600 seconds. {e}')
         sleep(600)
         await main()
+    
+    except Unauthorized:
+        cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
+        os.remove(cookies_path)
+        sleep(10)
+
         
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
