@@ -30,10 +30,11 @@ COOKIES_FILE: str = 'cookies.json'
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler()
 
-env_update_hour: int = -1 #update twitter settings on each hour change
 
 async def main():
     try:
+        env_update_hour: int = -1  #update twitter settings on each hour change
+
         await client.login(
             auth_info_1 = USERNAME,
             auth_info_2 = EMAIL,
@@ -48,15 +49,14 @@ async def main():
 
             return TWITTER_IDS, MIRROR_DISCORD, webhooks
 
-        if datetime.now().hour != env_update_hour or not any(TWITTER_IDS, MIRROR_DISCORD, webhooks):
-            TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
-            env_update_hour = datetime.now().hour
-
-            post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
-
-
         i: int = 0
         while True:
+            if datetime.now().hour != env_update_hour or not any(TWITTER_IDS, MIRROR_DISCORD, webhooks):
+                TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
+                env_update_hour = datetime.now().hour
+
+                post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
+
             while i < len(TWITTER_IDS):
                 try:
                     await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
