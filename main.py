@@ -25,6 +25,8 @@ EMAIL: str = getenv('EMAIL') #twitter
 PASSWORD: str = getenv('PASSWORD') #twitter
 TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
 
+MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD')) #discord mirror switch
+
 COOKIES_FILE: str = 'cookies.json'
 
 client: Client = Client('en-US')
