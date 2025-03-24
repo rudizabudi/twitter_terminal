@@ -51,7 +51,7 @@ async def main():
 
         i: int = 0
         while True:
-            if datetime.now().hour != env_update_hour or not any(TWITTER_IDS, MIRROR_DISCORD, webhooks):
+            if datetime.now().hour != env_update_hour or not any([TWITTER_IDS, MIRROR_DISCORD, webhooks]):
                 TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
                 env_update_hour = datetime.now().hour
 
