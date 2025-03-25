@@ -17,3 +17,4 @@ termux_instructions_raspi.txt
 .env_test
 .env
 envs
+cookies.json
