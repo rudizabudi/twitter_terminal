@@ -30,7 +30,6 @@ COOKIES_FILE: str = 'cookies.json'
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler()
 
-print(f'{PASSWORD=}')
 async def main():
     try:
         env_update_hour: int = -1  #update twitter settings on each hour change
