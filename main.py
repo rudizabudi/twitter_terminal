@@ -30,7 +30,7 @@ COOKIES_FILE: str = 'cookies.json'
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler()
 
-
+print(f'{PASSWORD=}')
 async def main():
     try:
         env_update_hour: int = -1  #update twitter settings on each hour change
@@ -87,12 +87,12 @@ async def main():
         cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
         os.remove(cookies_path)
         sleep(10)
-
         
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
-    for tweet in tweets:
+
+    for tweet in tweets:        
         ph.add_tweet(tweet)
 
 

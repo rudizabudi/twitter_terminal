@@ -14,7 +14,7 @@ class PostHandler:
         self.first_run: bool = True
 
     def set_discord_settings(self, mirroring: bool = False, webhooks: dict[str: list[str]] = None):
-        self.mirror_discord: bool = mirroring
+        self.mirror_discord = mirroring
         if self.mirror_discord and webhooks is None:
             raise ValueError('Discord webhook URL required for mirroring')
     
@@ -23,8 +23,7 @@ class PostHandler:
             raise ImportError('Exactly one default/catch-all webhook required')
         
         self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
-        self.rest_webhooks: dict[str: dict[str: str]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}
-   
+        self.rest_webhooks: dict[str: dict[str: str]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}   
 
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)
@@ -38,7 +37,8 @@ class PostHandler:
         self.sort_tweets()
         for post in self.post_queue:
             post_name: str = get_name(post)
-            post_text: str = html.unescape(post.text)
+            #post_text: str = html.unescape(post.text)
+            post_text: str = html.unescape(post.full_text) # 'Show more' text
 
             terminal_post_string: str = f'{get_post_time(post):<12} - \033[1m{post_name:>15}\33[0m: {post_text}'
 
@@ -56,7 +56,7 @@ class PostHandler:
         self.post_queue = []
     
     def sort_tweets(self) -> None:
-        self.post_queue = sorted(self.post_queue, key=lambda tweet: datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y'))
+        self.post_queue = sorted(self.post_queue, key = lambda tweet: datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y'))
     
     def terminal_post_tweet(self, post_string) -> None:
         print(post_string)
@@ -64,8 +64,8 @@ class PostHandler:
 
     def discord_post_tweet(self, post_string, twitterer='Alfred der Botler', avatar = '') -> None:
         data: dict[str: str] = {'content': post_string,
-                                 'username': twitterer,
-                                 'avatar_url': avatar} 
+                                'username': twitterer,
+                                'avatar_url': avatar} 
         
         for _, v in self.rest_webhooks.items():
             if v['filter'] in post_string:
@@ -76,7 +76,7 @@ class PostHandler:
         
         i: int = 0
         while i != len(webhooks):
-            response: requests.models.response = requests.post(webhooks[i], json=data)
+            response: requests.models.response = requests.post(webhooks[i], json = data)
 
             if response.status_code == 429:
                 sleep(30)
