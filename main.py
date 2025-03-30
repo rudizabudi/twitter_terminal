@@ -7,7 +7,7 @@ from os import getenv
 import os
 from time import sleep
 from twikit import Client, Tweet
-from twikit.errors import TooManyRequests, AccountSuspended, Unauthorized
+from twikit.errors import AccountSuspended, Forbidden, TooManyRequests, Unauthorized
 
 from posthandler import PostHandler
 
@@ -77,7 +77,7 @@ async def main():
             wait_time = next_update - datetime.now()
             sleep(wait_time.seconds)
 
-    except (TooManyRequests, ConnectTimeout, ReadTimeout, AccountSuspended) as e:
+    except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
         print(f'Error occured. Sleeping for 600 seconds. {e}')
         sleep(600)
         await main()
