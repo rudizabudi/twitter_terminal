@@ -67,23 +67,34 @@ class PostHandler:
                                 'username': twitterer,
                                 'avatar_url': avatar} 
         
-        for _, v in self.rest_webhooks.items():
-            if v['filter'] in post_string:
-                webhooks = v['urls']
-                break
+        for v in self.rest_webhooks.values():
+            if isinstance(v['filter'], list):
+                for filter_word in v['filter']:
+                    if filter_word in post_string:
+                        webhooks = v['urls']
+                        break
+            elif isinstance(v['filter'], str):
+                if v['filter'] in post_string:
+                    webhooks = v['urls']
+                    break
+            else:
+                raise TypeError('Filter must be str or list')
+
         else:
             webhooks = self.default_webhooks
         
         i: int = 0
         while i != len(webhooks):
-            response: requests.models.response = requests.post(webhooks[i], json = data)
+            while True:
+                response: requests.models.response = requests.post(webhooks[i], json = data)
 
-            if response.status_code == 429:
-                sleep(30)
-            elif response.status_code not in (200, 204):
-                raise Warning(f'Discord webhook returned status code {response.status_code}')
-            else:
-                i += 1
+                if response.status_code == 429:
+                    sleep(30)
+                elif response.status_code not in (200, 204):
+                    print(f'Discord webhook returned status code {response.status_code}')
+                else:
+                    i += 1
+                    break # sucessfully sent
         
 def get_post_time(tweet: Tweet, output_format: str = '%d%b%y %H:%M', output_timezone: pytz.timezone = pytz.timezone('Europe/Berlin')) -> str:
     #output_format: str = '%H:%M %Z %d%b%y'
