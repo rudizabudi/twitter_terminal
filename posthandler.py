@@ -44,7 +44,8 @@ class PostHandler:
 
             self.terminal_post_tweet(post_string = terminal_post_string)
 
-            if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
+            #if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
+            if self.mirror_discord:
                 #discord_post_string: str = f'{get_post_time(post):<12} - **{post_name:>15}** : {post_text}'
                 discord_post_string: str = f'{get_post_time(post):<12} : {post_text}'
                 discord_avatar: str = get_profile_image(post)
@@ -67,6 +68,7 @@ class PostHandler:
                                 'username': twitterer,
                                 'avatar_url': avatar} 
         
+        webhooks: list[str] = None
         for v in self.rest_webhooks.values():
             if isinstance(v['filter'], list):
                 for filter_word in v['filter']:
@@ -80,7 +82,7 @@ class PostHandler:
             else:
                 raise TypeError('Filter must be str or list')
 
-        else:
+        if webhooks is None:
             webhooks = self.default_webhooks
         
         i: int = 0
