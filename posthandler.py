@@ -44,8 +44,7 @@ class PostHandler:
 
             self.terminal_post_tweet(post_string = terminal_post_string)
 
-            #if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
-            if self.mirror_discord:
+            if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
                 #discord_post_string: str = f'{get_post_time(post):<12} - **{post_name:>15}** : {post_text}'
                 discord_post_string: str = f'{get_post_time(post):<12} : {post_text}'
                 discord_avatar: str = get_profile_image(post)
