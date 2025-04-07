@@ -3,7 +3,7 @@ Features:
 > 
 > Optional forwarding to Discord webhooks.
 > 
-> Optimized request rate keeps account (soft and hard) bann risk to a minimum.
+> Optimized request rate keeps account (soft and hard) ban risk to a minimum.
 
 !!! Caution: Risk of ban !!!
 > Do not use your main account and back it up!
