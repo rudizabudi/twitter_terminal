@@ -1,6 +1,8 @@
 Features:
 > Mirrors posts a list of provided twitter sources to your terminal.
 > 
+> No (paid) Twitter API access needed.
+>
 > Optional forwarding to Discord webhooks.
 > 
 > Optimized request rate keeps account (soft and hard) ban risk to a minimum.
