@@ -86,6 +86,9 @@ async def main():
         cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
         os.remove(cookies_path)
         sleep(10)
+
+    except Exception as e:
+        print(f'Not handled error: {e}')
         
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
@@ -96,4 +99,5 @@ async def ask_tweets(twitter_id: str, ph: PostHandler):
 
 
 asyncio.run(main())
+print('Finished')
 

@@ -18,12 +18,12 @@ class PostHandler:
         if self.mirror_discord and webhooks is None:
             raise ValueError('Discord webhook URL required for mirroring')
     
-        self.default_webhooks: dict[str: dict[str]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
+        self.default_webhooks: dict[str: dict[str: list[str]]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
         if len(self.default_webhooks) != 1:
             raise ImportError('Exactly one default/catch-all webhook required')
         
         self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
-        self.rest_webhooks: dict[str: dict[str: str]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}   
+        self.rest_webhooks: dict[str: dict[str: list[str]]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}   
 
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)

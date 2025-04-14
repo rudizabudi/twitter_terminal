@@ -9,6 +9,8 @@ wheels/
 # Virtual environments
 .venv
 dev_bin/
+.idea/
+.idea/TwitterTerminal.iml
 
 # Custom files
 tester.py
