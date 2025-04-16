@@ -89,11 +89,13 @@ class PostHandler:
             while True:
                 response: requests.models.response = requests.post(webhooks[i], json = data)
 
-                if response.status_code == 429:
+                #Response codes: https://discord.com/developers/docs/topics/opcodes-and-status-codes#http
+                if response.status_code == 429: # 429 (TOO MANY REQUESTS)	
                     sleep(30)
-                elif response.status_code not in (200, 204):
-                    print(f'Discord webhook returned status code {response.status_code}')
                 else:
+                    if response.status_code not in (200, 204): # (200 (OK), 204 (NO CONTENT))
+                        print(f'Discord webhook returned status code {response.status_code}')
+                        print(f'DEBUG: Json request data: {data}')
                     i += 1
                     break # sucessfully sent
         
