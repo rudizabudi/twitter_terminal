@@ -80,7 +80,6 @@ async def main():
     except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
         print(f'Error occured. Sleeping for 600 seconds. {e}')
         sleep(600)
-        await main()
     
     except Unauthorized:
         cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
@@ -97,7 +96,8 @@ async def ask_tweets(twitter_id: str, ph: PostHandler):
     for tweet in tweets:        
         ph.add_tweet(tweet)
 
-
-asyncio.run(main())
-print('Finished')
+while True:
+    print('Started')
+    asyncio.run(main())
+    print('Finished')
 
