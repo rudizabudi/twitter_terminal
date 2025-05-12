@@ -1,0 +1,75 @@
+{
+    "x_account": {
+        "username": "python110525",
+        "email": "python110525@tonne.to",
+        "password": "13qeadyc",
+        "cookies_file": "cookies.json"
+    },
+    "x_ids": {
+        "@deltaone": 2704294333,
+        "@financialjuice": 381696140,
+        "@wallstengine": 1508426880860704771
+    },
+    "use_discord": true,
+    "x_ids": {
+        "@deltaone": 2704294333,
+        "@financialjuice": 381696140,
+        "@wallstengine": 1508426880860704771,
+        "@POTUS": 1879650942410481666
+    },
+    "use_discord": true,
+    "webhooks": {
+        "MyServer": [
+            {
+                "name": "Rest",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "catch_all",
+                    "filter_data": ""
+                }
+            },
+            {
+                "name": "Important",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "filter_text",
+                    "filter_data": "QUICK MARKET SUMMARY,MARKET UPDATE,Heatmap,SECTOR NEWS,\ud83d\udd34,\ud83d\udea8,\ud83c\uddfa\ud83c\uddf8,\ud83c\udde8\ud83c\uddf3,Key Events"
+                }
+            },
+            {
+                "name": "Earnings",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "filter_text",
+                    "filter_data": "Earnings Highlights"
+                }
+            }
+        ],
+        "OtherServer": [
+            {
+                "name": "WallStEngine",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "filter_name",
+                    "filter_data": "Wall St Engine"
+                }
+            },
+            {
+                "name": "WBloomberg",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "filter_name",
+                    "filter_data": "*Walter Bloomberg"
+                }
+            },
+            {
+                "name": "Donald Trump",
+                "webhook": "https://discord.com/api/webhooks/LorenIpsum",
+                "filter": {
+                    "filter_type": "filter_name",
+                    "filter_data": "President Donald J. Trump"
+                }
+            }
+        ]
+    }
+}

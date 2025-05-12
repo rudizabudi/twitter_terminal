@@ -20,3 +20,5 @@ termux_instructions_raspi.txt
 .env
 envs
 cookies.json
+config_dev.json
+webhooks.json

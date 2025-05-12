@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import StrEnum
 import html
 import pytz
 import requests
@@ -18,12 +19,14 @@ class PostHandler:
         if self.mirror_discord and webhooks is None:
             raise ValueError('Discord webhook URL required for mirroring')
     
-        self.default_webhooks: dict[str: dict[str: list[str]]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
+        """ self.default_webhooks: dict[str: dict[str: list[str]]] = {k: v for k, v in webhooks.items() if v['filter'] == '*'}
         if len(self.default_webhooks) != 1:
-            raise ImportError('Exactly one default/catch-all webhook required')
+            raise ImportError('Exactly one default/catch-all webhook required') """
         
-        self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
+        """ self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
         self.rest_webhooks: dict[str: dict[str: list[str]]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}   
+        """
+        self.webhooks = webhooks
 
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)
@@ -43,7 +46,6 @@ class PostHandler:
             terminal_post_string: str = f'{get_post_time(post):<12} - \033[1m{post_name:>15}\33[0m: {post_text}'
 
             self.terminal_post_tweet(post_string = terminal_post_string)
-
             if self.mirror_discord and (self.first_run and post == self.post_queue[-1] or not self.first_run):
                 #discord_post_string: str = f'{get_post_time(post):<12} - **{post_name:>15}** : {post_text}'
                 discord_post_string: str = f'{get_post_time(post):<12} : {post_text}'
@@ -62,11 +64,7 @@ class PostHandler:
         print(post_string)
         print('\n')
 
-    def discord_post_tweet(self, post_string, twitterer='Alfred der Botler', avatar = '') -> None:
-        data: dict[str: str] = {'content': post_string,
-                                'username': twitterer,
-                                'avatar_url': avatar} 
-        
+    def get_webhook_old(self, post_string: str) -> list[str]:
         webhooks: list[str] = None
         for v in self.rest_webhooks.values():
             if isinstance(v['filter'], list):
@@ -83,11 +81,48 @@ class PostHandler:
 
         if webhooks is None:
             webhooks = self.default_webhooks
-        
+
+        return webhooks
+    
+    def get_webhooks(self, post_data: dict[str, str]) -> str:
+
+        post_webhooks: list[str] = []
+        for server, webhooks in self.webhooks.items():
+            post_webhook: str = None
+            catch_all_webhook = list(filter(lambda x: x['filter']['filter_type'] == DiscordFilterType.CATCH_ALL, webhooks))
+
+            for webhook_data in webhooks:
+                filter_type: DiscordFilterType = webhook_data['filter']['filter_type']
+                filter_data: str | list[str] = webhook_data['filter']['filter_data']
+               
+                match filter_type:
+                    case DiscordFilterType.FILTER_NAME:
+                        if filter_data in post_data['username']:
+                            post_webhook = webhook_data['webhook']
+                    case DiscordFilterType.FILTER_TEXT:
+                        if any([filter_word in post_data['content'] for filter_word in filter_data.split(',')]):
+                            post_webhook = webhook_data['webhook']
+
+            if post_webhook is None and len(catch_all_webhook) > 0:
+                post_webhook = catch_all_webhook[0]['webhook']
+
+            if post_webhook is not None:
+                post_webhooks.append(post_webhook)
+
+        return post_webhooks
+
+
+    def discord_post_tweet(self, post_string, twitterer='Alfred der Botler', avatar = '') -> None:
+        data: dict[str: str] = {'content': post_string,
+                                'username': twitterer,
+                                'avatar_url': avatar} 
+
+
         i: int = 0
+        webhooks: list[str] = self.get_webhooks(post_data = data)
         while i != len(webhooks):
             while True:
-                response: requests.models.response = requests.post(webhooks[i], json = data)
+                response: requests.models.Response = requests.post(webhooks[i], json = data)
 
                 #Response codes: https://discord.com/developers/docs/topics/opcodes-and-status-codes#http
                 if response.status_code == 429: # 429 (TOO MANY REQUESTS)	
@@ -109,4 +144,10 @@ def get_name(tweet: Tweet) -> str:
 
 def get_profile_image(tweet: Tweet) -> str:
     return tweet._data['core']['user_results']['result']['legacy']['profile_image_url_https']
+
+class DiscordFilterType(StrEnum):
+    FILTER_NAME: str = 'filter_name'
+    FILTER_TEXT: str = 'filter_text'
+    CATCH_ALL: str = 'catch_all'
+
 

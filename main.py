@@ -1,31 +1,50 @@
 from ast import literal_eval
 import asyncio
 from datetime import datetime, timezone, timedelta
-from dotenv import load_dotenv
 from httpx import ConnectError, ConnectTimeout, ReadTimeout
+import json
 from os import getenv
 import os
 from time import sleep
 from twikit import Client, Tweet
 from twikit.errors import AccountSuspended, Forbidden, TooManyRequests, Unauthorized
 
-from posthandler import PostHandler
+from posthandler import PostHandler, DiscordFilterType
 
 if getenv('DEV_VAR') == 'rudizabudi':
     print('DEV MODE')
-    load_dotenv('.env.dev')
+    config_file = 'config_dev.json'
 else:
-    load_dotenv('.env')
+    config_file = 'config.json'
+
+config_file_path = os.path.join(os.path.dirname(__file__), config_file)
+def load_config(config_file_path: str):
+    try:
+        with open(config_file_path, 'r') as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError('Config file not found. Please create a config.json file.')
+    
+    return config
+
+config = load_config(config_file_path)
+reversed_dft = {v: k for k, v in DiscordFilterType._member_map_.items()}
+
+for webbhook_data in config['webhooks'].values():
+    for webhook in webbhook_data:
+        webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
+        webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
 
 INTERVAL: int = 15 #modulo update intervall in mins
 UPDATE_OFFSET: int = 20 #offset to update point in secs
 
-USERNAME: str = getenv('USERNAME') #twitter
-EMAIL: str = getenv('EMAIL') #twitter
-PASSWORD: str = getenv('PASSWORD') #twitter
+USERNAME: str = config['x_account']['username'] #twitter
+EMAIL: str = config['x_account']['email'] #twitter
+PASSWORD: str = config['x_account']['password'] #twitter
+COOKIES_FILE: str = os.path.join(os.path.dirname(__file__), config['x_account']['cookies_file'])
+
 TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
 
-COOKIES_FILE: str = 'cookies.json'
 
 client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler()
@@ -41,10 +60,10 @@ async def main():
             cookies_file = COOKIES_FILE)
 
         def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
-            TWITTER_IDS: list[str] = getenv('twitter_ids').split(',') #get from here https://ilo.so/twitter-id/
-
-            MIRROR_DISCORD: bool = bool(getenv('MIRROR_DISCORD')) #discord mirror switch
-            webhooks: dict[str: dict[str: str]] = literal_eval(getenv('WEBHOOKS'))
+            config = load_config(config_file_path)
+            TWITTER_IDS: list[str] = list(config['x_ids'].values()) #get from here https://ilo.so/twitter-id/
+            MIRROR_DISCORD: bool = config['use_discord'] #discord mirror switch
+            webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
 
             return TWITTER_IDS, MIRROR_DISCORD, webhooks
 
@@ -85,9 +104,11 @@ async def main():
         cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
         os.remove(cookies_path)
         sleep(10)
+    sleep(60)
 
-    except Exception as e:
+"""     except Exception as e:
         print(f'Not handled error: {e}')
+        sleep(600) """
         
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
