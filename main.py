@@ -104,11 +104,10 @@ async def main():
         cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
         os.remove(cookies_path)
         sleep(10)
-    sleep(60)
 
-"""     except Exception as e:
+    except Exception as e:
         print(f'Not handled error: {e}')
-        sleep(600) """
+        sleep(600)
         
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
