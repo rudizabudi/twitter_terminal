@@ -58,7 +58,7 @@ async def main():
                 for webhook in webhook_data:
                     if not isinstance(webhook['filter']['filter_type'], DiscordFilterType):
                         webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
-                    if ',' in webhook['filter']['filter_data']:
+                    if not isinstance(webhook['filter']['filter_data'], list):
                         webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
 
             await client.login(
