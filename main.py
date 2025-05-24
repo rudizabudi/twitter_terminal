@@ -18,14 +18,6 @@ else:
     config_file = 'config.json'
 
 config_file_path = os.path.join(os.path.dirname(__file__), config_file)
-def load_config(config_file_path: str):
-    try:
-        with open(config_file_path, 'r') as f:
-            config = json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError('Config file not found. Please create a config.json file.')
-    
-    return config
 
 config = load_config(config_file_path)
 reversed_dft = {v: k for k, v in DiscordFilterType._member_map_.items()}
@@ -38,29 +30,25 @@ for webhook_data in config['webhooks'].values():
 INTERVAL: int = 15 # modulo update interval in mins
 UPDATE_OFFSET: int = 20 # offset to update point in secs
 
-TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
-
 post_handler: PostHandler = PostHandler()
 
 async def main():
     env_update_hour: int = -1 # update twitter settings on each hour change
 
-
     i: int = 0
     while True:
-        accounts = {i: v for i, v in enumerate(config['x_accounts'].values())}
-
-        if i == len(accounts.keys()):
-            i = 0
-
         try:
-            def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
-                config = load_config(config_file_path)
-                TWITTER_IDS: list[str] = list(config['x_ids'].values()) # get from here https://ilo.so/twitter-id/
-                MIRROR_DISCORD: bool = config['use_discord'] # discord mirror switch
-                webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
+            config = None
+            try:
+                with open(config_file_path, 'r') as f:
+                    config = json.load(f)
+            except FileNotFoundError:
+                raise FileNotFoundError('Config file not found. Please create a config.json file.')
 
-                return TWITTER_IDS, MIRROR_DISCORD, webhooks
+            accounts = {i: v for i, v in enumerate(config['x_accounts'].values())}
+
+            if i == len(accounts.keys()):
+                i = 0
 
             username: str = accounts[i]['username']  # twitter
             email: str = accounts[i]['email']  # twitter
@@ -68,22 +56,25 @@ async def main():
             cookies_file: str = os.path.join(os.path.dirname(__file__), f'{accounts[i]['username']}.json')
             client: Client = Client('en-US')
 
+            twitter_ids: list[str] = list(config['x_ids'].values())  # get from here https://ilo.so/twitter-id/
+            mirror_discord: bool = config['use_discord']  # discord mirror switch
+            webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
+
             await client.login(
                 auth_info_1=username,
                 auth_info_2=email,
                 password=password,
                 cookies_file=cookies_file)
 
-            if datetime.now().hour != env_update_hour or not any([TWITTER_IDS, MIRROR_DISCORD, webhooks]):
-                TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
+            if datetime.now().hour != env_update_hour or not any([twitter_ids, mirror_discord, webhooks]):
                 env_update_hour = datetime.now().hour
 
-                post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
+                post_handler.set_discord_settings(mirroring=mirror_discord, webhooks=webhooks)
 
             j: int = 0
-            while j < len(TWITTER_IDS):
+            while j < len(twitter_ids):
                 try:
-                    await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
+                    await ask_tweets(client=client, twitter_id=twitter_ids[i], ph=post_handler)
                     sleep(5)
                     j += 1
                 except ConnectError:
@@ -94,7 +85,6 @@ async def main():
 
         except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
             print(f'Error occurred with account {accounts[i]}. Sleeping for 600 seconds. {e}')
-            sleep(600)
 
         except Unauthorized:
             cookies_path = os.path.join(os.path.dirname(__file__), cookies_file)
@@ -116,7 +106,7 @@ async def main():
 
         i += 1
 
-async def ask_tweets(twitter_id: str, ph: PostHandler):
+async def ask_tweets(client: Client, twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
 
     for tweet in tweets:        
