@@ -19,14 +19,6 @@ else:
 
 config_file_path = os.path.join(os.path.dirname(__file__), config_file)
 
-config = load_config(config_file_path)
-reversed_dft = {v: k for k, v in DiscordFilterType._member_map_.items()}
-
-for webhook_data in config['webhooks'].values():
-    for webhook in webhook_data:
-        webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
-        webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
-
 INTERVAL: int = 15 # modulo update interval in mins
 UPDATE_OFFSET: int = 20 # offset to update point in secs
 
@@ -59,6 +51,13 @@ async def main():
             twitter_ids: list[str] = list(config['x_ids'].values())  # get from here https://ilo.so/twitter-id/
             mirror_discord: bool = config['use_discord']  # discord mirror switch
             webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
+
+            reversed_dft = {v: k for k, v in DiscordFilterType._member_map_.items()}
+
+            for webhook_data in webhooks.values():
+                for webhook in webhook_data:
+                    webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
+                    webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
 
             await client.login(
                 auth_info_1=username,
