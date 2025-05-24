@@ -1,16 +1,26 @@
 {
-    "x_account": {
-        "username": "python110525",
-        "email": "python110525@tonne.to",
-        "password": "13qeadyc",
-        "cookies_file": "cookies.json"
+    "x_accounts": {
+        "1": {
+            "username": "python110525",
+            "email": "python110525@tonne.to",
+            "password": "13qeadyc",
+        },
+        "2": {
+            "username": "python120525",
+            "email": "python120525@tonne.to",
+            "password": "13qeadyc",
+        },
+        "3": {
+            "username": "python130525",
+            "email": "python130525@tonne.to",
+            "password": "13qeadyc",
+        },
+        "4": {
+            "username": "python130525",
+            "email": "python130525@tonne.to",
+            "password": "13qeadyc",
+        }
     },
-    "x_ids": {
-        "@deltaone": 2704294333,
-        "@financialjuice": 381696140,
-        "@wallstengine": 1508426880860704771
-    },
-    "use_discord": true,
     "x_ids": {
         "@deltaone": 2704294333,
         "@financialjuice": 381696140,

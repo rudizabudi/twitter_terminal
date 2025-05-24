@@ -30,85 +30,91 @@ def load_config(config_file_path: str):
 config = load_config(config_file_path)
 reversed_dft = {v: k for k, v in DiscordFilterType._member_map_.items()}
 
-for webbhook_data in config['webhooks'].values():
-    for webhook in webbhook_data:
+for webhook_data in config['webhooks'].values():
+    for webhook in webhook_data:
         webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
         webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
 
-INTERVAL: int = 15 #modulo update intervall in mins
-UPDATE_OFFSET: int = 20 #offset to update point in secs
-
-USERNAME: str = config['x_account']['username'] #twitter
-EMAIL: str = config['x_account']['email'] #twitter
-PASSWORD: str = config['x_account']['password'] #twitter
-COOKIES_FILE: str = os.path.join(os.path.dirname(__file__), config['x_account']['cookies_file'])
+INTERVAL: int = 15 # modulo update interval in mins
+UPDATE_OFFSET: int = 20 # offset to update point in secs
 
 TWITTER_IDS, MIRROR_DISCORD, webhooks = None, None, None
 
-
-client: Client = Client('en-US')
 post_handler: PostHandler = PostHandler()
 
 async def main():
-    try:
-        env_update_hour: int = -1  #update twitter settings on each hour change
+    env_update_hour: int = -1 # update twitter settings on each hour change
 
-        await client.login(
-            auth_info_1 = USERNAME,
-            auth_info_2 = EMAIL,
-            password = PASSWORD,
-            cookies_file = COOKIES_FILE)
 
-        def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
-            config = load_config(config_file_path)
-            TWITTER_IDS: list[str] = list(config['x_ids'].values()) #get from here https://ilo.so/twitter-id/
-            MIRROR_DISCORD: bool = config['use_discord'] #discord mirror switch
-            webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
+    i: int = 0
+    while True:
+        accounts = {i: v for i, v in enumerate(config['x_accounts'].values())}
 
-            return TWITTER_IDS, MIRROR_DISCORD, webhooks
+        if i == len(accounts.keys()):
+            i = 0
 
-        i: int = 0
-        while True:
+        try:
+            def request_discord_settings() -> tuple[list[str], bool, dict[str: dict[str: str]]]:
+                config = load_config(config_file_path)
+                TWITTER_IDS: list[str] = list(config['x_ids'].values()) # get from here https://ilo.so/twitter-id/
+                MIRROR_DISCORD: bool = config['use_discord'] # discord mirror switch
+                webhooks: dict[str: dict[str: str | dict[str, str]]] = config['webhooks']
+
+                return TWITTER_IDS, MIRROR_DISCORD, webhooks
+
+            username: str = accounts[i]['username']  # twitter
+            email: str = accounts[i]['email']  # twitter
+            password: str = accounts[i]['password']  # twitter
+            cookies_file: str = os.path.join(os.path.dirname(__file__), f'{accounts[i]['username']}.json')
+            client: Client = Client('en-US')
+
+            await client.login(
+                auth_info_1=username,
+                auth_info_2=email,
+                password=password,
+                cookies_file=cookies_file)
+
             if datetime.now().hour != env_update_hour or not any([TWITTER_IDS, MIRROR_DISCORD, webhooks]):
                 TWITTER_IDS, MIRROR_DISCORD, webhooks = request_discord_settings()
                 env_update_hour = datetime.now().hour
 
                 post_handler.set_discord_settings(mirroring=MIRROR_DISCORD, webhooks=webhooks)
 
-            while i < len(TWITTER_IDS):
+            j: int = 0
+            while j < len(TWITTER_IDS):
                 try:
                     await ask_tweets(twitter_id=TWITTER_IDS[i], ph=post_handler)
                     sleep(5)
-                    i += 1
+                    j += 1
                 except ConnectError:
-                    pass        
-            
-            i = 0
+                    pass
+
+            j = 0
             post_handler.process_msgs()
 
-            for min in range(1, INTERVAL + 1):
-                next_update = datetime.now() + timedelta(minutes=min)
-                if next_update.minute % INTERVAL == 0:
-                    break
+        except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
+            print(f'Error occurred with account {accounts[i]}. Sleeping for 600 seconds. {e}')
+            sleep(600)
 
-            next_update = next_update.replace(second=UPDATE_OFFSET, microsecond=0)
+        except Unauthorized:
+            cookies_path = os.path.join(os.path.dirname(__file__), cookies_file)
+            os.remove(cookies_path)
 
-            wait_time = next_update - datetime.now()
-            sleep(wait_time.seconds)
+        except Exception as e:
+            print(f'Not handled error with account {accounts[i]}: {e}')
 
-    except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
-        print(f'Error occured. Sleeping for 600 seconds. {e}')
-        sleep(600)
-    
-    except Unauthorized:
-        cookies_path = os.path.join(os.path.dirname(__file__), COOKIES_FILE)
-        os.remove(cookies_path)
-        sleep(10)
+        next_update = datetime.now()
+        for min in range(1, INTERVAL + 1):
+            next_update = datetime.now() + timedelta(minutes=min)
+            if next_update.minute % INTERVAL == 0:
+                break
 
-    except Exception as e:
-        print(f'Not handled error: {e}')
-        sleep(600)
-        
+        next_update = next_update.replace(second=UPDATE_OFFSET, microsecond=0)
+
+        wait_time = next_update - datetime.now()
+        sleep(wait_time.seconds)
+
+        i += 1
 
 async def ask_tweets(twitter_id: str, ph: PostHandler):
     tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
