@@ -5,7 +5,9 @@ from httpx import ConnectError, ConnectTimeout, ReadTimeout
 import json
 from os import getenv
 import os
+import sys
 from time import sleep
+import traceback
 from twikit import Client, Tweet
 from twikit.errors import AccountSuspended, Forbidden, TooManyRequests, Unauthorized
 
@@ -86,14 +88,15 @@ async def main():
             post_handler.process_msgs()
 
         except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
-            print(f'Error occurred with account {accounts[i]}. Sleeping for 600 seconds. {e}')
+            print(f'Error occurred with account {accounts[i]['username']}: {e}')
 
         except Unauthorized:
             cookies_path = os.path.join(os.path.dirname(__file__), cookies_file)
             os.remove(cookies_path)
 
         except Exception as e:
-            print(f'Not handled error with account {accounts[i]}: {e}')
+            print(f'Lazily handled error ocurred with account {accounts[i]['username']}: {e}')
+            traceback.print_exc(file=sys.stdout)
 
         next_update = datetime.now()
         for min in range(1, INTERVAL + 1):
