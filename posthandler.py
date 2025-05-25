@@ -128,6 +128,7 @@ class PostHandler:
 
         i: int = 0
         webhooks: list[str] = self.get_webhooks(post_data = data)
+        print(f'Length webhooks: {len(webhooks)}.')
         while i != len(webhooks):
             while True:
                 response: requests.models.Response = requests.post(webhooks[i], json = data)

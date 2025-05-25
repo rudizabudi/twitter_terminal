@@ -40,7 +40,6 @@ async def main():
                 raise FileNotFoundError('Config file not found. Please create a config.json file.')
 
             accounts = {i: v for i, v in enumerate(config['x_accounts'].values())}
-            print(accounts)
             if i == len(accounts.keys()):
                 i = 0
 
@@ -49,6 +48,7 @@ async def main():
             password: str = accounts[i]['password']  # twitter
             cookies_file: str = os.path.join(os.path.dirname(__file__), f'{accounts[i]['username']}.json')
             client: Client = Client('en-US')
+            print(f'Current account {username}')
 
             twitter_ids: list[str] = list(config['x_ids'].values())  # get from here https://ilo.so/twitter-id/
             mirror_discord: bool = config['use_discord']  # discord mirror switch
@@ -61,7 +61,6 @@ async def main():
                     if not isinstance(webhook['filter']['filter_type'], DiscordFilterType):
                         webhook['filter']['filter_type'] = DiscordFilterType[reversed_dft[webhook['filter']['filter_type']]]
                     if not isinstance(webhook['filter']['filter_data'], list):
-                        print('Main', webhook['filter']['filter_data'])
                         webhook['filter']['filter_data'] = webhook['filter']['filter_data'].split(',')
 
             await client.login(
