@@ -93,9 +93,10 @@ class PostHandler:
 
             for webhook_data in webhooks:
                 filter_type: DiscordFilterType = webhook_data['filter']['filter_type']
-                filter_data: str | list[str] = webhook_data['filter']['filter_data']
 
-                if not isinstance(filter_data, list):
+                if filter_type == DiscordFilterType.CATCH_ALL:
+                    filter_data: str = webhook_data['filter']['filter_data']
+                elif filter_type == DiscordFilterType.FILTER_TEXT and not isinstance(filter_data, list):
                     filter_data = filter_data.split(',')
                
                 match filter_type:
