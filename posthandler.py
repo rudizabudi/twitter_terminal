@@ -94,14 +94,16 @@ class PostHandler:
             for webhook_data in webhooks:
                 filter_type: DiscordFilterType = webhook_data['filter']['filter_type']
                 filter_data: str | list[str] = webhook_data['filter']['filter_data']
+
+                if not isinstance(filter_data, list):
+                    filter_data = filter_data.split(',')
                
                 match filter_type:
                     case DiscordFilterType.FILTER_NAME:
                         if filter_data in post_data['username']:
                             post_webhook = webhook_data['webhook']
                     case DiscordFilterType.FILTER_TEXT:
-                        print('PostHandler', filter_data)
-                        if any([filter_word in post_data['content'] for filter_word in filter_data.split(',')]):
+                        if any([filter_word in post_data['content'] for filter_word in filter_data]):
                             post_webhook = webhook_data['webhook']
 
             if post_webhook is None and len(catch_all_webhook) > 0:
