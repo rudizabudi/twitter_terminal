@@ -100,6 +100,7 @@ class PostHandler:
                         if filter_data in post_data['username']:
                             post_webhook = webhook_data['webhook']
                     case DiscordFilterType.FILTER_TEXT:
+                        print('PostHandler', filter_data)
                         if any([filter_word in post_data['content'] for filter_word in filter_data.split(',')]):
                             post_webhook = webhook_data['webhook']
 
