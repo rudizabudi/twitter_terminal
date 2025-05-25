@@ -38,7 +38,7 @@ async def main():
                 raise FileNotFoundError('Config file not found. Please create a config.json file.')
 
             accounts = {i: v for i, v in enumerate(config['x_accounts'].values())}
-
+            print(accounts)
             if i == len(accounts.keys()):
                 i = 0
 
