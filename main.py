@@ -95,7 +95,7 @@ async def main():
             os.remove(cookies_path)
 
         except Exception as e:
-            print(f'Lazily handled error ocurred with account {accounts[i]['username']}: {e}')
+            print(f'Lazily handled error occurred with account {accounts[i]['username']}: {e}')
             traceback.print_exc(file=sys.stdout)
 
         next_update = datetime.now()
