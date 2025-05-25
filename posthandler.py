@@ -96,8 +96,10 @@ class PostHandler:
 
                 if filter_type == DiscordFilterType.CATCH_ALL:
                     filter_data: str = webhook_data['filter']['filter_data']
-                elif filter_type == DiscordFilterType.FILTER_TEXT and not isinstance(filter_data, list):
-                    filter_data = filter_data.split(',')
+                elif filter_type == DiscordFilterType.FILTER_TEXT:
+                    filter_data: str = webhook_data['filter']['filter_data']
+                    if isinstance(filter_data, str):
+                        filter_data = filter_data.split(',')
                
                 match filter_type:
                     case DiscordFilterType.FILTER_NAME:
