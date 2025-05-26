@@ -89,7 +89,8 @@ async def main():
         except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
             print(f'Error occurred with account {accounts[i]['username']}: {e}')
 
-        except Unauthorized:
+        except Unauthorized as e:
+            print(f'Not authorized with account {accounts[i]['username']}: {e}')
             cookies_path = os.path.join(os.path.dirname(__file__), cookies_file)
             os.remove(cookies_path)
 

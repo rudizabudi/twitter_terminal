@@ -59,8 +59,9 @@ class PostHandler:
     
     def sort_tweets(self) -> None:
         self.post_queue = sorted(self.post_queue, key = lambda tweet: datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y'))
-    
-    def terminal_post_tweet(self, post_string) -> None:
+
+    @staticmethod
+    def terminal_post_tweet(post_string) -> None:
         print(post_string)
         print('\n')
 
