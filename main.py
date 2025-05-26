@@ -75,9 +75,10 @@ async def main():
                 post_handler.set_discord_settings(mirroring=mirror_discord, webhooks=webhooks)
 
             j: int = 0
+            print(f'{len(twitter_ids)=} , {twitter_ids=}')
             while j < len(twitter_ids):
                 try:
-                    print(f'Requesting{j} {twitter_ids[i]}')
+                    print(f'Requesting {j} {twitter_ids[i]}')
                     await ask_tweets(client=client, twitter_id=twitter_ids[i], ph=post_handler)
                     sleep(5)
                     j += 1
