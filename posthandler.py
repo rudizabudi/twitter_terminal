@@ -26,18 +26,24 @@ class PostHandler:
         """ self.default_webhooks: list[str] = self.default_webhooks[list(self.default_webhooks.keys())[0]]['urls']
         self.rest_webhooks: dict[str: dict[str: list[str]]]= {k: v for k, v in webhooks.items() if v['filter']!= '*'}   
         """
+
         self.webhooks = webhooks
 
     def add_tweet(self, tweet: Tweet) -> None:
         self.new_tweets.append(tweet)
     
     def process_msgs(self) -> None:
+        print(f'{len(self.new_tweets)=}')
         while self.new_tweets:
             if self.new_tweets[-1] not in self.posted_tweets:
                 self.post_queue.append(self.new_tweets[-1])
             self.new_tweets.pop(-1)
+        print(f'{len(self.post_queue)=}')
 
         self.sort_tweets()
+
+        print(f'{self.posted_tweets=}')
+        print(f'{self.post_queue=}')
         for post in self.post_queue:
             post_name: str = get_name(post)
             #post_text: str = html.unescape(post.text)
