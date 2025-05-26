@@ -83,6 +83,7 @@ async def main():
                     sleep(5)
                     j += 1
                 except ConnectError:
+                    print('Connect error, retrying...')
                     pass
 
             j = 0
