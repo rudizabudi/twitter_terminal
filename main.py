@@ -78,8 +78,8 @@ async def main():
             print(f'{len(twitter_ids)=} , {twitter_ids=}')
             while j < len(twitter_ids):
                 try:
-                    print(f'Requesting {j} {twitter_ids[i]}')
-                    await ask_tweets(client=client, twitter_id=twitter_ids[i], ph=post_handler)
+                    print(f'Requesting {j} {twitter_ids[j]}')
+                    await ask_tweets(client=client, twitter_id=twitter_ids[j], ph=post_handler)
                     sleep(5)
                     j += 1
                 except ConnectError:
