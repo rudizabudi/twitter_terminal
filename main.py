@@ -73,7 +73,6 @@ async def main():
             post_handler.set_discord_settings(mirroring=mirror_discord, webhooks=webhooks)
 
         clients = get_clients()
-        print(f'Clients: {clients}')
         feed_counter: int = 0
         while feed_counter < len(twitter_ids):
             await clients[client_counter]['client'].login(
@@ -104,7 +103,7 @@ async def main():
 
             feed_counter += 1
 
-            if client_counter == len(clients.keys()):
+            if client_counter == len(clients.keys()) - 1:
                 client_counter = 0
             else:
                 client_counter += 1
