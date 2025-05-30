@@ -1,5 +1,6 @@
 from ast import literal_eval
 import asyncio
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from httpx import ConnectError, ConnectTimeout, ReadTimeout
 from itertools import cycle
@@ -11,6 +12,7 @@ from time import sleep
 import traceback
 from twikit import Client, Tweet
 from twikit.errors import AccountSuspended, Forbidden, TooManyRequests, Unauthorized
+from twikit.utils import Result
 
 from posthandler import PostHandler, DiscordFilterType
 
@@ -26,6 +28,8 @@ INTERVAL: int = 15 # modulo update interval in mins
 UPDATE_OFFSET: int = 20 # offset to update point in secs
 
 post_handler: PostHandler = PostHandler()
+tweet_cursor: defaultdict[str, str] = defaultdict(str)
+
 
 async def main():
     env_update_hour: int = -1 # update twitter settings on each hour change
@@ -82,6 +86,7 @@ async def main():
                     cookies_file=clients[client_counter]['cookies_file'])
 
             try:
+                print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
                 await ask_tweets(client=clients[client_counter]['client'], twitter_id=twitter_ids[feed_counter], ph=post_handler)
 
             except ConnectError:
@@ -123,10 +128,16 @@ async def main():
 
 
 async def ask_tweets(client: Client, twitter_id: str, ph: PostHandler):
-    tweets: list[Tweet] = await client.get_user_tweets(user_id=twitter_id, tweet_type='Tweets', count=10)
+    tweets: Result[Tweet] = await client.get_user_tweets(user_id=twitter_id,
+                                                         tweet_type='Tweets',
+                                                         count=10,
+                                                         cursor=tweet_cursor.get(twitter_id, None))
 
     for tweet in tweets:        
         ph.add_tweet(tweet)
+
+    tweet_cursor[twitter_id] = tweets.next_cursor
+
 
 while True:
     print('Started')
