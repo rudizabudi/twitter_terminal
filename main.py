@@ -88,6 +88,7 @@ async def main():
             try:
                 print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
                 await ask_tweets(client=clients[client_counter]['client'], twitter_id=twitter_ids[feed_counter], ph=post_handler)
+                feed_counter += 1
 
             except ConnectError:
                 print('Connect error, retrying...')
@@ -105,8 +106,6 @@ async def main():
                 traceback.print_exc(file=sys.stdout)
 
             sleep(5)
-
-            feed_counter += 1
 
             if client_counter == len(clients.keys()) - 1:
                 client_counter = 0
