@@ -108,6 +108,7 @@ class PostHandler:
                
                 match filter_type:
                     case DiscordFilterType.FILTER_NAME:
+                        print({'username': post_data['username'], 'filter_data': filter_data})
                         if any([filter_word in post_data['username'] for filter_word in filter_data]):
                             post_webhook = webhook_data['webhook']
                     case DiscordFilterType.FILTER_TEXT:
