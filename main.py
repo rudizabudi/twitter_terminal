@@ -135,7 +135,7 @@ async def ask_tweets(client: Client, twitter_id: str, ph: PostHandler):
     for tweet in tweets:        
         ph.add_tweet(tweet)
 
-    tweet_cursor[twitter_id] = tweets.next_cursor
+    tweet_cursor[twitter_id] = tweets.previous_cursor
 
 
 while True:
