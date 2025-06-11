@@ -79,13 +79,13 @@ async def main():
         clients = get_clients()
         feed_counter: int = 0
         while feed_counter < len(twitter_ids):
-            await clients[client_counter]['client'].login(
+            try:
+                await clients[client_counter]['client'].login(
                     auth_info_1=clients[client_counter]['username'],
                     auth_info_2=clients[client_counter]['email'],
                     password=clients[client_counter]['password'],
                     cookies_file=clients[client_counter]['cookies_file'])
 
-            try:
                 print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
                 await ask_tweets(client=clients[client_counter]['client'], twitter_id=twitter_ids[feed_counter], ph=post_handler)
                 feed_counter += 1
