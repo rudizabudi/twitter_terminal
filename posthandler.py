@@ -33,17 +33,13 @@ class PostHandler:
         self.new_tweets.append(tweet)
     
     def process_msgs(self) -> None:
-        print(f'{len(self.new_tweets)=}')
         while self.new_tweets:
             if self.new_tweets[-1] not in self.posted_tweets:
                 self.post_queue.append(self.new_tweets[-1])
             self.new_tweets.pop(-1)
-        print(f'{len(self.post_queue)=}')
 
         self.sort_tweets()
 
-        print(f'{self.posted_tweets=}')
-        print(f'{self.post_queue=}')
         for post in self.post_queue:
             post_name: str = get_name(post)
             #post_text: str = html.unescape(post.text)
@@ -132,10 +128,9 @@ class PostHandler:
                                 'username': twitterer,
                                 'avatar_url': avatar} 
 
-
         i: int = 0
         webhooks: list[str] = self.get_webhooks(post_data = data)
-        print(f'Length webhooks: {len(webhooks)}.')
+
         while i != len(webhooks):
             while True:
                 response: requests.models.Response = requests.post(webhooks[i], json = data)
