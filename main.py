@@ -94,7 +94,7 @@ async def main():
                 print('Connect error, retrying...')
 
             except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
-                print(f'Error occurred with account {clients[client_counter]['username']}: {e}')
+                print(f'Error: Account {clients[client_counter]['username']}: {e['message']}({e['code']}).')
 
             except Unauthorized as e:
                 print(f'Not authorized with account {clients[client_counter]['username']}: {e}')
