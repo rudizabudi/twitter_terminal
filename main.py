@@ -86,7 +86,7 @@ async def main():
                     password=clients[client_counter]['password'],
                     cookies_file=clients[client_counter]['cookies_file'])
 
-                print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
+                #print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
                 await ask_tweets(client=clients[client_counter]['client'], twitter_id=twitter_ids[feed_counter], ph=post_handler)
                 feed_counter += 1
 
