@@ -141,7 +141,8 @@ class PostHandler:
                 else:
                     if response.status_code not in (200, 204): # (200 (OK), 204 (NO CONTENT))
                         print(f'Discord webhook returned status code {response.status_code}')
-                        print(f'DEBUG: Json request data: {data}')
+                        print(f'Json request data: {data}')
+                        print(f'Webhook URL: {webhooks[i]}')
                     i += 1
                     break # sucessfully sent
         
