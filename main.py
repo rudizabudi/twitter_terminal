@@ -79,6 +79,7 @@ async def main():
         clients = get_clients()
         feed_counter: int = 0
         while feed_counter < len(twitter_ids):
+            #TODO add timeout block for each client
             try:
                 await clients[client_counter]['client'].login(
                     auth_info_1=clients[client_counter]['username'],
@@ -91,20 +92,21 @@ async def main():
                 feed_counter += 1
 
             except ConnectError:
-                print('Connect error, retrying...')
+                print('Connect error, retrying...', '\n')
 
             except (AccountSuspended, ConnectTimeout, Forbidden, ReadTimeout, TooManyRequests) as e:
-                print(f'Error: Account {clients[client_counter]['username']}: {e}')
+                print(f'Error: Account {clients[client_counter]['username']}: {e}', '\n')
 
             except Unauthorized as e:
-                print(f'Not authorized with account {clients[client_counter]['username']}: {e}')
+                print(f'Not authorized with account {clients[client_counter]['username']}: {e}', '\n')
                 cookies_path = os.path.join(os.path.dirname(__file__), clients[client_counter]['cookies_file'])
                 os.remove(cookies_path)
 
             except Exception as e:
-                print(f'Lazily handled error occurred with account {clients[client_counter]['username']}: {e}')
+                print(f'Lazily handled error occurred with account {clients[client_counter]['username']}: {e}', '\n')
                 traceback.print_exc(file=sys.stdout)
 
+            await clients[client_counter]['client'].logout()
             sleep(5)
 
             if client_counter == len(clients.keys()) - 1:
@@ -139,7 +141,5 @@ async def ask_tweets(client: Client, twitter_id: str, ph: PostHandler):
 
 
 while True:
-    print('Started')
     asyncio.run(main())
-    print('Finished')
 
