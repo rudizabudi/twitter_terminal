@@ -117,7 +117,6 @@ async def main():
                 print(f'Lazily handled error occurred with account {clients[client_counter]['username']}: {e}', '\n')
                 traceback.print_exc(file=sys.stdout)
 
-            await clients[client_counter]['client'].logout()
             sleep(5)
 
             if client_counter == len(clients.keys()) - 1:
