@@ -1,9 +1,8 @@
-from ast import literal_eval
 import asyncio
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from httpx import ConnectError, ConnectTimeout, ReadTimeout
-from itertools import cycle
 import json
 from os import getenv
 import os
@@ -31,22 +30,31 @@ post_handler: PostHandler = PostHandler()
 tweet_cursor: defaultdict[str, str] = defaultdict(str)
 
 
+@dataclass
+class Clients:
+    clients: dict[int, dict[str, str | bool | Client]]
+
+
 async def main():
     env_update_hour: int = -1 # update twitter settings on each hour change
 
-    def get_clients() -> dict[int, dict[str, str | Client]]:
-
-        clients: dict[int, dict[str, str | Client]] = {}
+    def get_clients() -> dict[int, dict[str, str | bool | Client]]:
+        new_clients = {}
         for i, v in enumerate(config['x_accounts'].values()):
-            clients[i] = {
-                'username': v['username'],
-                'email': v['email'],
-                'password': v['password'],
-                'cookies_file': os.path.join(os.path.dirname(__file__), f'{v['username']}.json'),
-                'client': Client('en-US')
-            }
+            if len(filtered_results := list(filter(lambda x: x['username'] == v['username'], Clients.clients.values()))) > 0:
+                new_clients[i] = filtered_results[0]
+            else:
+                new_clients[i] = {
+                    'username': v['username'],
+                    'email': v['email'],
+                    'password': v['password'],
+                    'cookies_file': os.path.join(os.path.dirname(__file__), f'{v['username']}.json'),
+                    'client': Client('en-US'),
+                    'logged_in': False
+                }
 
-        return clients
+        Clients.clients = new_clients
+        return new_clients
 
     client_counter: int = 0
     while True:
@@ -56,7 +64,6 @@ async def main():
                 config = json.load(f)
         except FileNotFoundError:
             raise FileNotFoundError('Config file not found. Please create a config.json file.')
-
 
         twitter_ids: list[str] = list(config['x_ids'].values())  # get from here https://ilo.so/twitter-id/
         mirror_discord: bool = config['use_discord']  # discord mirror switch
@@ -77,15 +84,19 @@ async def main():
             post_handler.set_discord_settings(mirroring=mirror_discord, webhooks=webhooks)
 
         clients = get_clients()
+
         feed_counter: int = 0
         while feed_counter < len(twitter_ids):
             #TODO add timeout block for each client
             try:
-                await clients[client_counter]['client'].login(
-                    auth_info_1=clients[client_counter]['username'],
-                    auth_info_2=clients[client_counter]['email'],
-                    password=clients[client_counter]['password'],
-                    cookies_file=clients[client_counter]['cookies_file'])
+                if not clients[client_counter].get('logged_in', False):
+                    await clients[client_counter]['client'].login(
+                        auth_info_1=clients[client_counter]['username'],
+                        auth_info_2=clients[client_counter]['email'],
+                        password=clients[client_counter]['password'],
+                        cookies_file=clients[client_counter]['cookies_file'])
+
+                    clients[client_counter]['logged_in'] = True
 
                 #print(f'Asking tweets for ID {twitter_ids[feed_counter]} with {clients[client_counter]['username']}.')
                 await ask_tweets(client=clients[client_counter]['client'], twitter_id=twitter_ids[feed_counter], ph=post_handler)
