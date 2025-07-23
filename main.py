@@ -31,7 +31,7 @@ tweet_cursor: defaultdict[str, str] = defaultdict(str)
 
 
 @dataclass
-class Clients:
+class ClientsDC:
     clients: dict[int, dict[str, str | bool | Client]]
 
 
@@ -41,7 +41,7 @@ async def main():
     def get_clients() -> dict[int, dict[str, str | bool | Client]]:
         new_clients = {}
         for i, v in enumerate(config['x_accounts'].values()):
-            if len(filtered_results := list(filter(lambda x: x['username'] == v['username'], Clients.clients.values()))) > 0:
+            if len(filtered_results := list(filter(lambda x: x['username'] == v['username'], ClientsDC.clients.values()))) > 0:
                 new_clients[i] = filtered_results[0]
             else:
                 new_clients[i] = {
@@ -53,7 +53,7 @@ async def main():
                     'logged_in': False
                 }
 
-        Clients.clients = new_clients
+        ClientsDC.clients = new_clients
         return new_clients
 
     client_counter: int = 0
