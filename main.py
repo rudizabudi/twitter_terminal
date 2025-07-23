@@ -88,6 +88,7 @@ async def main():
         while feed_counter < len(twitter_ids):
             #TODO add timeout block for each client
             try:
+                print(f'Current account: {clients[client_counter]['username']}', '\n')
                 if not clients[client_counter].get('logged_in', False):
                     await clients[client_counter]['client'].login(
                         auth_info_1=clients[client_counter]['username'],
