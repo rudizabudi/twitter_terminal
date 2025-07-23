@@ -30,9 +30,8 @@ post_handler: PostHandler = PostHandler()
 tweet_cursor: defaultdict[str, str] = defaultdict(str)
 
 
-@dataclass
 class ClientsDC:
-    clients: dict[int, dict[str, str | bool | Client]]
+    clients: dict[int, dict[str, str | bool | Client]] | None = None
 
 
 async def main():
@@ -41,7 +40,7 @@ async def main():
     def get_clients() -> dict[int, dict[str, str | bool | Client]]:
         new_clients = {}
         for i, v in enumerate(config['x_accounts'].values()):
-            if len(filtered_results := list(filter(lambda x: x['username'] == v['username'], ClientsDC.clients.values()))) > 0:
+            if isinstance(ClientsDC.clients, dict) and len(filtered_results := list(filter(lambda x: x['username'] == v['username'], ClientsDC.clients.values()))) > 0:
                 new_clients[i] = filtered_results[0]
             else:
                 new_clients[i] = {
