@@ -111,7 +111,8 @@ async def main():
             except Unauthorized as e:
                 print(f'Not authorized with account {clients[client_counter]['username']}: {e}', '\n')
                 cookies_path = os.path.join(os.path.dirname(__file__), clients[client_counter]['cookies_file'])
-                os.remove(cookies_path)
+                if os.path.exists(cookies_path):
+                    os.remove(cookies_path)
 
             except Exception as e:
                 print(f'Lazily handled error occurred with account {clients[client_counter]['username']}: {e}', '\n')
